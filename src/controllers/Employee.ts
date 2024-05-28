@@ -3,7 +3,7 @@ import { Employee, EmployeeInterface } from '../models/Employee';
 import { paginate, paginationMapper } from '../helper/paginate';
 import { EmployeeSchedule } from '../models/EmployeeSchedule';
 import { CommonController } from '../helper/common';
-import { load } from 'dotenv';
+// import { load } from 'dotenv';
 import { ProjectAllocation } from '../models/ProjectAllocation';
 
 const commonController = new CommonController()

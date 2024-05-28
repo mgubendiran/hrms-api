@@ -22,23 +22,31 @@ export default class Database {
         this.maxPool = Number(process.env.MAX_POOL) || 10;
         this.minPool = Number(process.env.MIN_POOL) || 1;
 
-        this.database = new sequelize(this.db, this.user, this.password, {
-            host: this.host,
+        const sequelizeConfig = {
             dialect: 'mssql',
-            dialectOptions: {
-                encrypt: false
-            },
-            port: this.port,
-            logging: false,
-            // schema: "dbo"
-            // operatorsAliases: false,
-            // pool: {
-            //     max: this.maxPool,
-            //     min: this.minPool,
-            //     acquire: 30000,
-            //     idle: 10000
-            // }
-        })
+            host: this.host,
+            username: this.user,
+            password: this.password,
+            database: this.db,
+        }
+        this.database = new sequelize(sequelizeConfig);
+        // this.database = new sequelize(this.db, this.user, this.password, {
+        //     host: this.host,
+        //     dialect: 'mssql',
+        //     dialectOptions: {
+        //         encrypt: false
+        //     },
+        //     port: this.port,
+        //     logging: false,
+        //     // schema: "dbo"
+        //     // operatorsAliases: false,
+        //     // pool: {
+        //     //     max: this.maxPool,
+        //     //     min: this.minPool,
+        //     //     acquire: 30000,
+        //     //     idle: 10000
+        //     // }
+        // })
         // this.database = new sequelize({
         //     user: this.user,
         //     password: this.password,
