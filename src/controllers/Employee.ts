@@ -17,7 +17,7 @@ export class EmployeeController {
 
     readAll(req: Request, res: Response) {
         Employee.findAll({
-            include: [EmployeeSchedule]
+            // include: [EmployeeSchedule]
         })
             .then((users: EmployeeInterface[]) => {
                 res.json(users);
