@@ -46,6 +46,8 @@ export default class MainRouter {
             .get(this.employeeScheduleController.read)
         this.router.route('/employee/schedule/search')
             .post(this.employeeScheduleController.search)
+        this.router.route('/employee/:id/dashboard')
+            .get(this.employeeController.getEmployeeDashboardDataById)
         this.router.route('/employee/:id')
             .get(this.employeeController.read)
             // .put(this.employeeController.update)

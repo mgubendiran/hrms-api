@@ -1,10 +1,12 @@
 import { Request, Response } from 'express';
 import { Employee, EmployeeInterface } from '../models/Employee';
 import { paginate, paginationMapper } from '../helper/paginate';
-import { EmployeeSchedule } from '../models/EmployeeSchedule';
+import { EmployeeSchedule, EmployeeScheduleInterface } from '../models/EmployeeSchedule';
 import { CommonController } from '../helper/common';
 // import { load } from 'dotenv';
-import { ProjectAllocation } from '../models/ProjectAllocation';
+import { ProjectAllocation, ProjectAllocationInterface } from '../models/ProjectAllocation';
+import { Project, ProjectInterface } from '../models/Project';
+import { AttendanceLog } from '../models/AttendenceLog';
 
 const commonController = new CommonController()
 export class EmployeeController {
@@ -39,6 +41,55 @@ export class EmployeeController {
             .catch((err: any) => {
                 res.json(err);
             });
+    }
+
+    async getEmployeeDashboardDataById(req: Request, res: Response) {
+        try{
+            let empId = req.params?.id;
+            console.log(empId)
+            let data: any = {}
+            let employee: EmployeeInterface = await Employee.findById(empId);
+            if(employee) {
+                data.manager = await Employee.findById(employee.ManagerId); ;
+                let schedule: EmployeeScheduleInterface[] = await EmployeeSchedule.findAll({where: {EmployeeId: empId}});
+                data.schedule = schedule?.[0] || null;
+            }
+            else{
+                throw new Error('employee not found')
+            }
+            if(employee) {
+                let projectAllocation: ProjectAllocationInterface[] =await  ProjectAllocation.findAll({where: {EmployeeId: empId}});
+                if(projectAllocation?.[0]) {
+                    let project: ProjectInterface = await Project.findById(projectAllocation[0].ProjectID);
+                    data.project = project;
+
+                }
+            }
+            if(employee) {
+                let attendance_logs = await AttendanceLog.findAll({
+                    where: {EmployeeNumber: employee.Number}
+                });
+                data.attendance_logs = attendance_logs
+            }
+            res.json({...data, ...(employee?.dataValues)});
+        }
+        catch(err: any) {
+            res.json(err);
+        }
+        // let empId = req.params?.id;
+        // console.log(empId)
+        // Employee.findById(empId)
+        //     .then((user: EmployeeInterface | null) => {
+        //         if (user) {
+        //             res.json(user);
+        //         } else {
+        //             res.status(204).send();
+        //         }
+        //     })
+        //     .then(user)
+        //     .catch((err: any) => {
+        //         res.json(err);
+        //     });
     }
 
     search(req: Request, res: Response) {

@@ -1,5 +1,9 @@
 import database from '../config/db';
 import sequelize, { BOOLEAN } from 'sequelize';
+import { EmployeeScheduleInterface } from './EmployeeSchedule';
+import { ProjectAllocationInterface } from './ProjectAllocation';
+import { AttendanceLogInterface } from './AttendenceLog';
+import { ProjectInterface } from './Project';
 
 // Database connection instance
 let databaseInstance = new database().database;
@@ -19,6 +23,9 @@ export interface EmployeeInterface {
 	IsSeparation: boolean;
 	SeparationDate: Date;
 	IsTempDeactivation: boolean;
+    schedule: EmployeeScheduleInterface;
+    project: ProjectInterface
+    attendance_logs: AttendanceLogInterface[]
 }
 
 // Sequelize Model
