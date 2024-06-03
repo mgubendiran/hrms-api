@@ -68,6 +68,9 @@ export default class MainRouter {
             .get(this.attendanceLogController.getAttendanceLogsByEmployeeByMonth)
         this.router.route('/attendance_log/project/:projectId/year/:year/month/:month')
             .get(this.attendanceLogController.getAttendanceLogsByProjectByMonth)
+        this.router.route('/attendance_log/project/:projectId/year/:year/month/:month/export')
+            .get(this.attendanceLogController.downloadFile)
+        
     }
 
 

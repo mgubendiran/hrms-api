@@ -48,7 +48,7 @@ export class EmployeeController {
             let empId = req.params?.id;
             console.log(empId)
             let data: any = {}
-            let employee: EmployeeInterface = await Employee.findById(empId);
+            let employee: any = await Employee.findById(empId);
             if(employee) {
                 data.manager = await Employee.findById(employee.ManagerId); ;
                 let schedule: EmployeeScheduleInterface[] = await EmployeeSchedule.findAll({where: {EmployeeId: empId}});
@@ -60,9 +60,8 @@ export class EmployeeController {
             if(employee) {
                 let projectAllocation: ProjectAllocationInterface[] =await  ProjectAllocation.findAll({where: {EmployeeId: empId}});
                 if(projectAllocation?.[0]) {
-                    let project: ProjectInterface = await Project.findById(projectAllocation[0].ProjectID);
+                    let project: any = await Project.findById(projectAllocation[0].ProjectID);
                     data.project = project;
-
                 }
             }
             if(employee) {

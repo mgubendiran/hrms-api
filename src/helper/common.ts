@@ -53,6 +53,12 @@ export class CommonController {
          });
          return result
     }
+    async getEmployeById(id: number) {
+        let result = await Employee.findById(id).catch((err: any) => {
+             throw err
+         });
+         return result
+    }
 
 
     getDay = (date: string) => {
