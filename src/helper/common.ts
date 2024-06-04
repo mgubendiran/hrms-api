@@ -36,7 +36,8 @@ export class CommonController {
         let result = await Employee.findAll({
              where: {
                 EmployeeId: {in: ids}
-             }
+             },
+             order: ["FirstName", "LastName"]
          }).catch((err: any) => {
              throw err
          });

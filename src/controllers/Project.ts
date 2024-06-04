@@ -8,7 +8,9 @@ export class ProjectController {
     constructor() { }
 
     readAll(req: Request, res: Response) {
-        Project.findAll({})
+        Project.findAll({
+            order: ['project_code', 'project_name']
+        })
             .then((users: ProjectInterface[]) => {
                 res.json(users);
             })
