@@ -11,32 +11,35 @@ export function base64_encode(file: string) {
     return new Buffer(bitmap).toString('base64');
 }
 
-export function generateXLS(data: any) {
+export function generateXLS(data: any, complienceImage: any, attendanceImage: any, project: string, cp: any, ap: any) {
   try {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("project_report", {
       pageSetup: { paperSize: 9, orientation: "landscape" },
+      
     });
-
+    // worksheet.views = [{
+    //   showGridLines: false
+    // }]
     // Initialize the row index
-    let rowIndex = 2;
+    let rowIndex = 5;
+    let InitialRow = worksheet.getRow(1)
+    InitialRow.font =  { bold: true };
+    InitialRow.getCell('A').value = "Report: " + (project || '');
+    let headerRow = worksheet.getRow(2)
+    headerRow.font =  { bold: true };
 
-    // EmpId: d.EmployeeId,
-    // EmpNumber: d.Number,
-    // Username: d.UserName,
-    // Name: `${d.FirstName} ${d.LastName}`,
-    // "WorkLocation" : d.WorkLocation,
-    // "Commited Days": commitedDays.join(', '),
-    // Present: present,
-    // Absent: d.absent + (d.half / 2),
-    // Compliance: compliance
+    headerRow.getCell('A').value = 'Compliance '+ (cp || '0')  + '%';
+    headerRow.getCell('F').value = 'Attendance ' + (ap || '0')  + '%';
 
     let row = worksheet.getRow(rowIndex);
     row.values = ["EmpId", "EmpNumber", "Username", "Name", "Project", "Manager", "Work Mode", "Work Location", "Commited Days", "Present", "Absent", "Compliance", "Attendance"];
     row.font = { bold: true };
 
-    const columnWidths = [20, 20, 20, 30, 20, 50, 20, 20, 20];
-    
+    const columnWidths = [10, 20, 20, 30, 20, 50, 20, 20, 20];
+    worksheet.mergeCells(
+      `A1:M1`
+    );    
     row.eachCell((cell: any, colNumber: any) => {
         const columnIndex = colNumber - 1;
         const columnWidth = columnWidths[columnIndex];
@@ -67,21 +70,47 @@ export function generateXLS(data: any) {
       rowIndex += data.length;
 
     // Merge cells for the logo
+    // worksheet.mergeCells(
+    //   `A1:${String.fromCharCode(65 + worksheet.columns.length - 1)}1`
+    // );
+
     worksheet.mergeCells(
-      `A1:${String.fromCharCode(65 + worksheet.columns.length - 1)}1`
+      `A3:${String.fromCharCode(65 + 3)}3`
+    );
+    worksheet.mergeCells(
+      `${String.fromCharCode(65 + 4)}3:${String.fromCharCode(65 + 7)}3`
     );
 
     const image = workbook.addImage({
-      base64: base64_encode(path.join("public", 'logo.png')), //replace it your image (base 64 in this case)
+      // base64: base64_encode(path.join("public", 'logo.png')), //replace it your image (base 64 in this case)
+      base64: complienceImage,
+      extension: "png",
+    });
+
+    const image2 = workbook.addImage({
+      // base64: base64_encode(path.join("public", 'logo.png')), //replace it your image (base 64 in this case)
+      base64: attendanceImage,
       extension: "png",
     });
 
     worksheet.addImage(image, {
-      tl: { col: 0, row: 0 },
-      ext: { width: 60, height: 40 },
+      tl: { col: 0, row: 3 },
+      ext: { width: 250, height: 250 },
     });
 
-    worksheet.getRow(1).height = 40;
+    worksheet.mergeCells(
+      `A4:D4`
+    );
+    worksheet.mergeCells(
+      `E4:G4`
+    );
+
+    worksheet.addImage(image2, {
+      tl: { col: 4, row: 3 },
+      ext: { width: 250, height: 250 },
+    });
+
+    worksheet.getRow(4).height = 250;
 
     
     // Define the border style

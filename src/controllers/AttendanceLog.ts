@@ -6,7 +6,26 @@ import { CommonController } from '../helper/common';
 import { EmployeeInterface } from '../models/Employee';
 import { generateXLS } from '../helper/ExcelGenerator';
 import { Project } from '../models/Project';
+const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
+import fs from 'fs'
+const width = 400; //px
+const height = 400; //px
+const backgroundColour = 'white'; // Uses https://www.w3schools.com/tags/canvas_fillstyle.asp
+const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height, backgroundColour });
+// const chartJSNodeCanvas = new ChartJSNodeCanvas({ width: "300px", height: "300px", backgroundColour: "white" });
 
+async function getImageData(configuration: any) {
+    const dataUrl = await chartJSNodeCanvas.renderToDataURL(configuration);
+    const base64Image = dataUrl
+
+    var base64Data = base64Image.replace(/^data:image\/png;base64,/, "");
+    fs.writeFile("out.png", base64Data, 'base64', function (err) {
+        if (err) {
+            console.log(err);
+        }
+    });
+    return base64Data;
+}
 const commonController = new CommonController()
 
 export class AttendanceLogController {
@@ -240,6 +259,7 @@ export class AttendanceLogController {
                 let DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
                 return DAYS.filter(day => schedule?.[day] == '1');
             }
+            let cp = 0, ca = 0, ap = 0, aa = 0;
             let data = result.map((d: any) => {
                 let present = 0, compliance = 0, attendance = 0;
                 let commitedDays = getCommitedDays(d?.schedule || {})
@@ -247,6 +267,10 @@ export class AttendanceLogController {
                     present = d?.present + (d?.half/2);
                     attendance = present * 100 / (d.present + d.half + d.absent);
                     compliance = (d?.complience?.present / d?.complience?.count ) * 100
+                    cp +=  (d?.present + d?.half)
+                    ca += d?.absent;
+                    ap += present;
+                    aa += d.present + d.half + d.absent
                 }
                 // let manager = commonController.getEmployeById(parseInt(d?.ManagerId));
                 let manager = managers?.find((mg: any) => mg?.dataValues?.EmployeeId == d?.ManagerId);               
@@ -266,13 +290,55 @@ export class AttendanceLogController {
                     Attendance: Math.round(attendance)
                 }
             })
-            // let tasks = [
-            //     { id: 1, name: "task1", status: "approved" },
-            //     { id: 2, name: "task2", status: "denied" }
-            // ]
-            // console.log(data)
             if (data.length > 0) {
-                const xlsBuffer = await generateXLS(data);
+                const config1 = {
+                    type: 'doughnut',
+                    data: {
+                        labels: [
+                            'Present ' + Math.round((cp / (cp + ca)) * 100)  + '%',
+                            'Absent ' + Math.round((ca / (cp + ca)) * 100)  + '%',
+                          ],
+                          datasets: [{
+                            label: 'Compliance',
+                            data: [
+                                Math.round((cp / (cp + ca)) * 100),
+                                Math.round((ca / (cp + ca)) * 100)
+                            ],
+                            backgroundColor: [
+                              'green',
+                              'red'
+                            //   'rgb(54, 162, 235)'
+                            ],
+                            hoverOffset: 4
+                          }]
+                    },
+                  };
+
+                const config2 = {
+                    type: 'doughnut',
+                    data: {
+                        labels: [
+                            'Present ' + Math.round((ap / (ap + aa)) * 100) + '%',
+                            'Absent ' + Math.round((aa / (ap + aa)) * 100)  + '%',
+                          ],
+                          datasets: [{
+                            label: 'Attendance',
+                            data: [
+                                Math.round((ap / (ap + aa)) * 100),
+                                Math.round((aa / (ap + aa)) * 100)
+                            ],
+                            backgroundColor: [
+                              'green',
+                              'red'
+                            //   'rgb(54, 162, 235)'
+                            ],
+                            hoverOffset: 4
+                          }]
+                    },
+                  };
+                let imageData = await getImageData(config1);
+                let imageData2 = await getImageData(config2);
+                const xlsBuffer = await generateXLS(data, imageData, imageData2, `${project?.project_code || ''} ${project?.project_name || ''}`, Math.round((cp / (cp + ca)) * 100), Math.round((ap / (ap + aa)) * 100), );
                 res.set("Content-Disposition", "attachment; filename=report.xls");
                 res.type("application/vnd.ms-excel");
                 res.send(xlsBuffer);
