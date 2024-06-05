@@ -12,7 +12,8 @@ export class CommonController {
     async getEmployeesByProject(id: number) {
        let result = await ProjectAllocation.findAll({
             where: {
-                ProjectID: id
+                ProjectID: id,
+                IsReleased: false
             }
         }).catch((err: any) => {
             throw err

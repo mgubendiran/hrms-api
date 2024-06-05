@@ -19,7 +19,11 @@ export class EmployeeController {
 
     readAll(req: Request, res: Response) {
         Employee.findAll({
-            order: ["FirstName", "LastName"]
+            where: {
+                IsActive: true
+            },
+            order: ["FirstName", "LastName"],
+
             // include: [EmployeeSchedule]
         })
             .then((users: EmployeeInterface[]) => {
