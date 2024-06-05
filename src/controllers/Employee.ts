@@ -126,6 +126,7 @@ export class EmployeeController {
 
            let employees= await commonController.getEmployeesByIds(employeeIds);
            result.employees = employees;
+           result.employeeIds = employees.map(o => o.EmployeeId)
 
         //    console.log(employeeIds)
             res.json(result)

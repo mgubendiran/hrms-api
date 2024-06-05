@@ -13,7 +13,7 @@ export class CommonController {
        let result = await ProjectAllocation.findAll({
             where: {
                 ProjectID: id,
-                IsReleased: false
+                // IsReleased: false
             }
         }).catch((err: any) => {
             throw err
@@ -36,7 +36,8 @@ export class CommonController {
     async getEmployeesByIds(ids: number[]) {
         let result = await Employee.findAll({
              where: {
-                EmployeeId: {in: ids}
+                EmployeeId: {in: ids},
+                IsActive: true
              },
              order: ["FirstName", "LastName"]
          }).catch((err: any) => {
