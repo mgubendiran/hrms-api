@@ -44,6 +44,8 @@ export default class MainRouter {
             .get(this.employeeScheduleController.readAll)
         this.router.route('/employee/project/:projectId')
             .get(this.employeeController.getEmployeesByProject)
+        this.router.route('/employee/client/:client')
+            .get(this.employeeController.getEmployeesByClient)
         this.router.route('/employee/schedule/:id')
             .get(this.employeeScheduleController.read)
         this.router.route('/employee/schedule/search')

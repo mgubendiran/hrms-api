@@ -137,6 +137,35 @@ export class EmployeeController {
         
 
     }
+    async getEmployeesByClient(req: Request, res: Response) {
+        try {
+            let client = req.params.client ;
+            const result: any = {}
+            // get employees from project allocation
+            let projects = await commonController.getProjectByclient(client);
+            if(!projects) {
+                throw new Error('project not found')
+            }
+            result.project = projects;
+
+           let projectAllocationlist = commonController.getEmployeesByProjects(projects.map(p => p.project_id));
+           let employeeIds = (await projectAllocationlist).map(obj => obj.EmployeeID);
+           result.employeeIds = employeeIds;
+
+           let employees= await commonController.getEmployeesByIds(employeeIds);
+           result.employees = employees;
+           result.employeeIds = employees.map(o => o.EmployeeId)
+
+        //    console.log(employeeIds)
+            res.json(result)
+        }
+        catch(err) {
+            res.json(err);
+        }
+        
+
+    }
+
 
     create(req: Request, res: Response) {
         Employee.create(req.body)

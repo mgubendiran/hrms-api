@@ -21,11 +21,33 @@ export class CommonController {
         console.log(result);
         return result
     }
+    async getEmployeesByProjects(ids: number[]) {
+        let result = await ProjectAllocation.findAll({
+             where: {
+                 ProjectID : {in : ids},
+             }
+         }).catch((err: any) => {
+             throw err
+         });
+         console.log(result);
+         return result
+     }
 
     async getProjectById(id: number) {
         let result = await Project.findOne({
              where: {
                 project_id: id
+             }
+         }).catch((err: any) => {
+             throw err
+         });
+         return result
+    }
+    
+    async getProjectByclient(client: string) {
+        let result = await Project.findAll({
+             where: {
+                client_name: client
              }
          }).catch((err: any) => {
              throw err
