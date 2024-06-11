@@ -247,6 +247,12 @@ export class AttendanceLogController {
                         default: ++others; break;
                     }
                 });
+                let project: any = {};
+                let projectAlloc = empIds.find(e => e.EmployeeID == emp.EmployeeId);
+                if(projectAlloc) {
+                    project = projects.find(p => p.project_id == projectAlloc.ProjectID);
+                }
+
                 return {
                     ...emp.dataValues,
                     present,
@@ -257,7 +263,8 @@ export class AttendanceLogController {
                     others,
                     complience,
                     // attendanceLogs.filter(log => log.EmployeeNumber == emp.dataValues.Number), //.map(obj => { return {...obj, day: new Date(obj.AttendanceDate)}}),
-                    schedule
+                    schedule,
+                    project
                 }
             })
             res.json(result)
