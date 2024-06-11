@@ -187,6 +187,92 @@ export class AttendanceLogController {
         //     res.json(err);
         // });
     }
+
+    async getAttendanceLogsByClientByMonth(req: Request, res: Response) {
+        try {
+            let client = req.params.client_name;
+            let month = parseInt(req.params.month);
+            let year = parseInt(req.params.year);
+            // let empIds = await commonController.getEmployeesByProject(id);
+
+            let projects = await commonController.getProjectByclient(client);
+            if(!projects) {
+                throw new Error('client not found')
+            }
+            // result.project = projects;
+
+           let empIds = await commonController.getEmployeesByProjects(projects.map(p => p.project_id));
+           
+
+            let employeeSchedule = await commonController.getEmployeesScheduleByIds(empIds.map(obj => obj.EmployeeID))
+            let employees: any = await commonController.getEmployeesByIds(empIds.map(obj => obj.EmployeeID));
+            // console.log(employees)
+            let attendanceLogs = await AttendanceLog.findAll({
+                // attributes: [[ fn('MONTH', col('AttendanceDate')), 'data']],
+                where: {
+                    EmployeeNumber: { in: employees.map((obj: any) => obj.Number) },
+                    // AttendanceDate: { [Op.between]: ['2024-04-01', '2024-4-30']},
+                    AttendanceDate: {
+                        [Op.and]: [
+                            where(fn('MONTH', col('AttendanceDate')), month),
+                            where(fn('YEAR', col('AttendanceDate')), year),
+                            // where(fn('WEEK', col('AttendanceDate')), 1)
+                        ]
+                    }
+                }
+            })
+            let result = employees.map((emp: any) => {
+                let logs: any = attendanceLogs.filter(log => log.EmployeeNumber == emp.dataValues.Number);
+                logs = logs.map((obj: any) => {
+                    return { ...obj.dataValues, day: commonController.getDay(obj.dataValues.AttendanceDate) }
+                })
+                let schedule: any = employeeSchedule.find(schedule => schedule.EmployeeID == emp.dataValues.EmployeeId)
+                let present = 0;
+                let absent = 0;
+                let half = 0;
+                let wo = 0;
+                let others = 0;
+                let complience = {
+                    present: 0,
+                    count: 0
+                }
+                logs.forEach((element: any) => {
+                    let isComplience = schedule ? schedule[element.day] == '1' ? true : false : false;
+                    isComplience ? ++complience.count : null;
+                    switch (element.StatusCode) {
+                        case 'P': ++present; isComplience ? ++complience.present : null; break;
+                        case 'A': ++absent; break;
+                        case '½P': ++half; isComplience ? ++complience.present : null; break;
+                        case 'WO': ++wo; break;
+                        default: ++others; break;
+                    }
+                });
+                return {
+                    ...emp.dataValues,
+                    present,
+                    absent,
+                    half,
+                    logs,
+                    wo,
+                    others,
+                    complience,
+                    // attendanceLogs.filter(log => log.EmployeeNumber == emp.dataValues.Number), //.map(obj => { return {...obj, day: new Date(obj.AttendanceDate)}}),
+                    schedule
+                }
+            })
+            res.json(result)
+
+        }
+        catch (err) {
+            res.json(err);
+        }
+        // .then((users: AttendanceLogInterface[]) => {
+        //     res.json(users);
+        // })
+        // .catch((err: any) => {
+        //     res.json(err);
+        // });
+    }
     async downloadFile(req: Request, res: Response) {
         try {
             

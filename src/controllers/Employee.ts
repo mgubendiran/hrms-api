@@ -144,12 +144,12 @@ export class EmployeeController {
             // get employees from project allocation
             let projects = await commonController.getProjectByclient(client);
             if(!projects) {
-                throw new Error('project not found')
+                throw new Error('client not found')
             }
             result.project = projects;
 
-           let projectAllocationlist = commonController.getEmployeesByProjects(projects.map(p => p.project_id));
-           let employeeIds = (await projectAllocationlist).map(obj => obj.EmployeeID);
+           let projectAllocationlist = await commonController.getEmployeesByProjects(projects.map(p => p.project_id));
+           let employeeIds = (projectAllocationlist).map(obj => obj.EmployeeID);
            result.employeeIds = employeeIds;
 
            let employees= await commonController.getEmployeesByIds(employeeIds);
