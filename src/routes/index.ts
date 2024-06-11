@@ -32,6 +32,8 @@ export default class MainRouter {
             .get(this.projectController.readAll)
         this.router.route('/project/:id')
             .get(this.projectController.read)
+        this.router.route('/client')
+            .get(this.projectController.getProjectByclient)
         this.router.route('/project/search')
             .post(this.projectController.search)
 

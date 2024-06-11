@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { Project, ProjectInterface } from '../models/Project';
 import { paginate, paginationMapper } from '../helper/paginate';
-import { Op, where, fn, col } from 'sequelize';
+import sequelize, { Op, where, fn, col } from 'sequelize';
 
 export class ProjectController {
 
@@ -13,6 +13,25 @@ export class ProjectController {
         })
             .then((users: ProjectInterface[]) => {
                 res.json(users);
+            })
+            .catch((err: any) => {
+                res.json(err);
+            });
+    }
+
+    getProjectByclient(req: Request, res: Response) {
+        Project.findAll({
+            // attributes: [
+            //     'client_name',
+            //     [sequelize.fn('COUNT', sequelize.col('project_id')), 'no_of_projects'],
+            //   ],
+            // group: ['client_name']
+            order: ["client_name"]
+        })
+            .then((data: any[]) => {
+                let hash = data.reduce((p,c) => (p[c.client_name] ? p[c.client_name].push(c) : p[c.client_name] = [c],p) ,{});
+                let newData: any = Object.keys(hash).map(k => ({client_name: k, projects: hash[k]}));
+                res.json(newData);
             })
             .catch((err: any) => {
                 res.json(err);
