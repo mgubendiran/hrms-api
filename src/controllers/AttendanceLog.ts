@@ -232,17 +232,19 @@ export class AttendanceLogController {
                 let half = 0;
                 let wo = 0;
                 let others = 0;
+                let count = 0;
                 let complience = {
                     present: 0,
-                    count: 0
+                    count: 0,
+                    half: 0
                 }
                 logs.forEach((element: any) => {
                     let isComplience = schedule ? schedule[element.day] == '1' ? true : false : false;
                     isComplience ? ++complience.count : null;
                     switch (element.StatusCode) {
-                        case 'P': ++present; isComplience ? ++complience.present : null; break;
-                        case 'A': ++absent; break;
-                        case '½P': ++half; isComplience ? ++complience.present : null; break;
+                        case 'P': ++present; count++; isComplience ? ++complience.present : null; break;
+                        case 'A': ++absent; count++; break;
+                        case '½P': ++half; count++; isComplience ? ++complience.half : null; break;
                         case 'WO': ++wo; break;
                         default: ++others; break;
                     }
@@ -258,6 +260,7 @@ export class AttendanceLogController {
                     present,
                     absent,
                     half,
+                    count,
                     logs,
                     wo,
                     others,
