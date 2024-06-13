@@ -11,10 +11,10 @@ export function base64_encode(file: string) {
     return new Buffer(bitmap).toString('base64');
 }
 
-export function generateXLS(data: any, complienceImage: any, attendanceImage: any, project: string, cp: any, ap: any) {
+export function generateXLS(data: any, complienceImage: any, attendanceImage: any, project: string, cp: any, ap: any, month: string = '') {
   try {
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("project_report", {
+    const worksheet = workbook.addWorksheet(`${project}_${month}`, {
       pageSetup: { paperSize: 9, orientation: "landscape" },
       
     });
@@ -25,7 +25,7 @@ export function generateXLS(data: any, complienceImage: any, attendanceImage: an
     let rowIndex = 5;
     let InitialRow = worksheet.getRow(1)
     InitialRow.font =  { bold: true };
-    InitialRow.getCell('A').value = "Report: " + (project || '');
+    InitialRow.getCell('A').value = "Client: " + (project || '');
     let headerRow = worksheet.getRow(2)
     headerRow.font =  { bold: true };
 
@@ -33,7 +33,7 @@ export function generateXLS(data: any, complienceImage: any, attendanceImage: an
     headerRow.getCell('F').value = 'Attendance ' + (ap || '0')  + '%';
 
     let row = worksheet.getRow(rowIndex);
-    row.values = ["EmpId", "EmpNumber", "Username", "Name", "Project", "Manager", "Work Mode", "Work Location", "Commited Days", "Present", "Absent", "Compliance", "Attendance"];
+    row.values = ["EmpId", "EmpNumber", "Username", "Name", "Project", "Manager", "Work Mode", "Work Location", "Commited Days", "Present", "Absent", "Compliance %", "Attendance %"];
     row.font = { bold: true };
 
     const columnWidths = [10, 20, 20, 30, 20, 50, 20, 20, 20];
