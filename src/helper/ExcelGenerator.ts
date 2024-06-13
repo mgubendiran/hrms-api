@@ -26,6 +26,7 @@ export function generateXLS(data: any, complienceImage: any, attendanceImage: an
     let InitialRow = worksheet.getRow(1)
     InitialRow.font =  { bold: true };
     InitialRow.getCell('A').value = "Client: " + (project || '');
+    InitialRow.getCell('A').alignment = { vertical: 'middle', horizontal: 'center' };
     let headerRow = worksheet.getRow(2)
     headerRow.font =  { bold: true };
 
@@ -97,6 +98,7 @@ export function generateXLS(data: any, complienceImage: any, attendanceImage: an
       tl: { col: 0, row: 3 },
       ext: { width: 250, height: 250 },
     });
+    worksheet.getCell("A5").alignment = { vertical: 'middle', horizontal: 'center' };
 
     worksheet.mergeCells(
       `A4:D4`

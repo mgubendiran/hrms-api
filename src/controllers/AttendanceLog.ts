@@ -597,8 +597,8 @@ export class AttendanceLogController {
                     type: 'doughnut',
                     data: {
                         labels: [
-                            'Present ' + Math.round(((cp + (ch/2))/ccount) *100)  + '%',
-                            'Absent ' + Math.round(((ca + (ch/2))/ccount) *100)  + '%',
+                            'Compliance Achieved: ' + Math.round(((cp + (ch/2))/ccount) *100)  + '%',
+                            'Compliance Not Achieved: ' + Math.round(((ca + (ch/2))/ccount) *100)  + '%',
                           ],
                           datasets: [{
                             label: 'Compliance',
@@ -620,8 +620,8 @@ export class AttendanceLogController {
                     type: 'doughnut',
                     data: {
                         labels: [
-                            'Present ' + Math.round(((ap + (ah/2))/acount) *100) + '%',
-                            'Absent ' + Math.round(((aa + (ah/2))/acount) *100) + '%',
+                            'Work-In Office ' + Math.round(((ap + (ah/2))/acount) *100) + '%',
+                            'Work-In Remote ' + Math.round(((aa + (ah/2))/acount) *100) + '%',
                           ],
                           datasets: [{
                             label: 'Attendance',
