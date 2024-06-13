@@ -571,7 +571,8 @@ export class AttendanceLogController {
                 // let manager = commonController.getEmployeById(parseInt(d?.ManagerId));
                 let manager = managers?.find((mg: any) => mg?.dataValues?.EmployeeId == d?.ManagerId); 
                 let compliance = d?.complience?.present +(d?.complience?.half/2) ;
-                let attendance = d?.count - (d?.present + (d?.half))     ; 
+                let attendance = commitedDays.length > 0 ? d?.present + (d?.half/2) : 0 ; 
+                let aNaN = isNaN(Math.round((attendance/d?.count) *100))
                 return  {
                     EmpId: d.EmployeeId,
                     EmpNumber: d.Number,
@@ -582,10 +583,10 @@ export class AttendanceLogController {
                     "Work Mode": commitedDays.length > 0 ? "Office" : "Remote",
                     "Work Location" : d.WorkLocation,
                     "Commited Days": commitedDays.join(', '),
-                    Present: d?.complience?.present || 0 +(d?.complience?.half || 0 /2),
-                    Absent: d?.complience?.absent || 0 +(d?.complience?.half || 0 /2),
+                    Present: d?.complience?.present +(d?.complience?.half /2),
+                    Absent: d?.absent +(d?.half/2),
                     Compliance: Math.round((compliance/((d?.complience?.count) || 1)) *100),
-                    Attendance: Math.round((attendance/((d?.count) || 1)) *100)
+                    Attendance: aNaN ? 0 : Math.round((attendance/d?.count) *100)
                 }
             })
             console.log("CP-AP final: : ", cp, ca, ch, ap, aa, ah )
