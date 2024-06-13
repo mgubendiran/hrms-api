@@ -585,8 +585,8 @@ export class AttendanceLogController {
                     "Commited Days": commitedDays.join(', '),
                     Present: d?.complience?.present +(d?.complience?.half /2),
                     Absent: d?.absent +(d?.half/2),
-                    Compliance: Math.round((compliance/((d?.complience?.count) || 1)) *100),
-                    Attendance: aNaN ? 0 : Math.round((attendance/d?.count) *100)
+                    Compliance: Math.round((compliance/((d?.complience?.count) || 1)) *100) + '%',
+                    Attendance: aNaN ? 0 : Math.round((attendance/d?.count) *100) + '%'
                 }
             })
             console.log("CP-AP final: : ", cp, ca, ch, ap, aa, ah )
