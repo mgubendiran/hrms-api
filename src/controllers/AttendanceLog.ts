@@ -586,7 +586,7 @@ export class AttendanceLogController {
                     Present: d?.present +(d?.half /2),
                     Absent: d?.absent +(d?.half/2),
                     Compliance: Math.round((compliance/((d?.complience?.count) || 1)) *100) + '%',
-                    Attendance: aNaN ? 0 : Math.round((attendance/d?.count) *100) + '%'
+                    Attendance: aNaN ? '0%' : Math.round((attendance/d?.count) *100) + '%'
                 }
             })
             console.log("CP-AP final: : ", cp, ca, ch, ap, aa, ah )
