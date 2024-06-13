@@ -583,7 +583,7 @@ export class AttendanceLogController {
                     "Work Mode": commitedDays.length > 0 ? "Office" : "Remote",
                     "Work Location" : d.WorkLocation,
                     "Commited Days": commitedDays.join(', '),
-                    Present: d?.complience?.present +(d?.complience?.half /2),
+                    Present: d?.present +(d?.half /2),
                     Absent: d?.absent +(d?.half/2),
                     Compliance: Math.round((compliance/((d?.complience?.count) || 1)) *100) + '%',
                     Attendance: aNaN ? 0 : Math.round((attendance/d?.count) *100) + '%'
