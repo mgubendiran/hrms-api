@@ -33,10 +33,10 @@ export function generateXLS(data: any, complienceImage: any, attendanceImage: an
     headerRow.getCell('F').value = 'Attendance ' + (ap || '0')  + '%';
 
     let row = worksheet.getRow(rowIndex);
-    row.values = ["EmpId", "EmpNumber", "Username", "Name", "Project", "Manager", "Work Mode", "Work Location", "Commited Days", "Present", "Absent", "Compliance %", "Attendance %"];
+    row.values = ["EmpId", "EmpNumber", "Username", "Name", "Project", "Manager", "Work Mode", "Work Location", "Commited Days", "Work-In Office", "Work-In Remote", "Compliance %", "Attendance %"];
     row.font = { bold: true };
 
-    const columnWidths = [10, 20, 20, 30, 20, 50, 20, 20, 20];
+    const columnWidths = [10, 20, 20, 30, 30, 30, 20, 20, 45, 15, 15, 15, 15];
     worksheet.mergeCells(
       `A1:M1`
     );    
