@@ -96,7 +96,7 @@ export function generateXLS(data: any, complienceImage: any, attendanceImage: an
 
     worksheet.addImage(image, {
       tl: { col: 0, row: 3 },
-      ext: { width: 250, height: 250 },
+      ext: { width: 250, height: 350 },
     });
     worksheet.getCell("A5").alignment = { vertical: 'middle', horizontal: 'center' };
 
@@ -109,10 +109,10 @@ export function generateXLS(data: any, complienceImage: any, attendanceImage: an
 
     worksheet.addImage(image2, {
       tl: { col: 4, row: 3 },
-      ext: { width: 250, height: 250 },
+      ext: { width: 250, height: 350 },
     });
 
-    worksheet.getRow(4).height = 250;
+    worksheet.getRow(4).height = 350;
 
     
     // Define the border style
