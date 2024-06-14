@@ -30,7 +30,7 @@ export function generateXLS(data: any, complienceImage: any, attendanceImage: an
     let headerRow = worksheet.getRow(2)
     headerRow.font =  { bold: true };
 
-    headerRow.getCell('A').value = 'Compliance '+ (cp || '0')  + '%';
+    headerRow.getCell('B').value = 'Compliance '+ (cp || '0')  + '%';
     headerRow.getCell('F').value = 'Attendance ' + (ap || '0')  + '%';
 
     let row = worksheet.getRow(rowIndex);
@@ -39,7 +39,7 @@ export function generateXLS(data: any, complienceImage: any, attendanceImage: an
 
     const columnWidths = [10, 20, 20, 30, 30, 30, 20, 20, 45, 15, 15, 15, 15];
     worksheet.mergeCells(
-      `A1:M1`
+      `A1:H1`
     );    
     row.eachCell((cell: any, colNumber: any) => {
         const columnIndex = colNumber - 1;
@@ -86,16 +86,18 @@ export function generateXLS(data: any, complienceImage: any, attendanceImage: an
       // base64: base64_encode(path.join("public", 'logo.png')), //replace it your image (base 64 in this case)
       base64: complienceImage,
       extension: "png",
+      editAs: 'oneCell'
     });
 
     const image2 = workbook.addImage({
       // base64: base64_encode(path.join("public", 'logo.png')), //replace it your image (base 64 in this case)
       base64: attendanceImage,
       extension: "png",
+      editAs: 'oneCell'
     });
 
     worksheet.addImage(image, {
-      tl: { col: 0, row: 3 },
+      tl: { col: 0.8, row: 3.8 },
       ext: { width: 250, height: 350 },
     });
     worksheet.getCell("A5").alignment = { vertical: 'middle', horizontal: 'center' };
@@ -108,7 +110,7 @@ export function generateXLS(data: any, complienceImage: any, attendanceImage: an
     );
 
     worksheet.addImage(image2, {
-      tl: { col: 4, row: 3 },
+      tl: { col: 4.80, row: 3.80 },
       ext: { width: 250, height: 350 },
     });
 
