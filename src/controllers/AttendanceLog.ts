@@ -79,8 +79,12 @@ const generateZipV2 = async (excel: any, compliance: any, attendance: any, filen
 const generateZIp = async (excel: any, compliance: any, attendance: any, filename: string) => {
     const zip = new AdmZip();
     zip.addFile(`${filename}_report.xls`, excel);
-    zip.addFile(`${filename}_compliance.png`, compliance, { base64: true });
-    zip.addFile(`${filename}attendance.png`, attendance, { base64: true });
+    // var base64 = new Buffer(overlayImg1.toString(), 'binary').toString('base64');
+
+    zip.addLocalFile('compliance.png')
+    zip.addLocalFile('attendance.png')
+    // zip.addFile(`${filename}_compliance.png`, Buffer.from("data:image\/png;base64,"+ compliance));
+    // zip.addFile(`${filename}_attendance.png`, Buffer.from("data:image\/png;base64,"+ attendance));
     // zip.writeZip("sample.zip");
     return await zip.toBuffer()
 
@@ -110,13 +114,13 @@ async function getTextImage(contents: string[]) {
         })
 }
 
-async function textOverlay(imgData: any, contents: any) {
+async function textOverlay(imgData: any, contents: any, fileName: string) {
     let newImage = await new Jimp(400, 550, 'white');
     const image = await Jimp.read(Buffer.from(imgData, 'base64'));
     let sec_img = await getTextImage(contents)
     newImage.composite(image, 0, 0, Jimp.BLEND_SOURCE_OVER)
     newImage.composite(sec_img, 0, 400, Jimp.BLEND_SOURCE_OVER);
-    await newImage.writeAsync('op.textOverlay.png');
+    await newImage.writeAsync(fileName);
     // console.log('data---: ', await newImage.getBase64(Jimp.AUTO, (err, res) => {
     //     console.log(res)}))
     let baseB4 = ''
@@ -762,13 +766,14 @@ export class AttendanceLogController {
                     [`Expected In-Office - ${ccount} days`,
                     `Compliance Achieved - ${(cp + (ch / 2))} days (Full:${cp} - Half:${ch})`,
                     `Compliance Not Achieved - ${ca + (ch / 2)} days`
-                    ])
+                    ], 'compliance.png')
                 let overlayImg2 = await textOverlay(
                     imageData2,
                     [`Monthly Working - ${acount} days`,
                     `Work-In Office - ${(ap + (ah / 2))} days (Full:${ap} - Half:${ah})`,
                     `Not Work-In Office - ${aa + (ah / 2)} days`
-                    ])
+                    ], 'attendance.png')
+
                  let xlsBuffer = await generateXLS(data, overlayImg1, overlayImg2, client, Math.round(((cp + (ch / 2)) / ccount) * 100), Math.round(((ap + (ah / 2)) / acount) * 100), monthList[month]);
                  let buffer = await generateZIp(xlsBuffer, overlayImg1, overlayImg2, `${client}${monthList[month]}`)
                 // res.send(zip)
