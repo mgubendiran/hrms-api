@@ -839,4 +839,163 @@ export class AttendanceLogController {
         }
     }
 
+
+    async exchangeDataMonthlyReport(req: Request, res: Response) {
+        try {
+            let client = req.params.client;
+            let month = parseInt(req.params.month);
+            let year = parseInt(req.params.year);
+            // let empIds = await commonController.getEmployeesByProject(id);
+
+            let projects = await commonController.getProjectByclient(client);
+            if (!projects) {
+                throw new Error('client not found')
+            }
+            // result.project = projects;
+
+            let empIds = await commonController.getEmployeesByProjects(projects.map(p => p.project_id));
+
+
+            let employeeSchedule = await commonController.getEmployeesScheduleByIds(empIds.map(obj => obj.EmployeeID))
+            let employees: any = await commonController.getEmployeesByIds(empIds.map(obj => obj.EmployeeID));
+            // console.log(employees)
+            let managers: any = await commonController.getEmployeesByIds(employees.map((obj: any) => obj.ManagerId));
+
+            let attendanceLogs = await AttendanceLog.findAll({
+                // attributes: [[ fn('MONTH', col('AttendanceDate')), 'data']],
+                where: {
+                    EmployeeNumber: { in: employees.map((obj: any) => obj.Number) },
+                    // AttendanceDate: { [Op.between]: ['2024-04-01', '2024-4-30']},
+                    AttendanceDate: {
+                        [Op.and]: [
+                            where(fn('MONTH', col('AttendanceDate')), month),
+                            where(fn('YEAR', col('AttendanceDate')), year),
+                            // where(fn('WEEK', col('AttendanceDate')), 1)
+                        ]
+                    }
+                }
+            })
+            let result = employees.map((emp: any) => {
+                let logs: any = attendanceLogs.filter(log => log.EmployeeNumber == emp.dataValues.Number);
+                logs = logs.map((obj: any) => {
+                    return { ...obj.dataValues, day: commonController.getDay(obj.dataValues.AttendanceDate) }
+                })
+                let schedule: any = employeeSchedule.find(schedule => schedule.EmployeeID == emp.dataValues.EmployeeId)
+                let present = 0;
+                let absent = 0;
+                let half = 0;
+                let wo = 0;
+                let others = 0;
+                let count = 0;
+                let complience = {
+                    present: 0,
+                    count: 0,
+                    half: 0
+                }
+                logs.forEach((element: any) => {
+                    let isComplience = schedule ? schedule[element.day] == '1' ? true : false : false;
+                    isComplience ? ++complience.count : null;
+                    switch (element.StatusCode) {
+                        case 'P': ++present; count++; isComplience ? ++complience.present : null; break;
+                        case 'A': ++absent; count++; break;
+                        case '½P': ++half; count++; isComplience ? ++complience.half : null; break;
+                        case 'WO': ++wo; break;
+                        default: ++others; break;
+                    }
+                });
+                let project: any = {};
+                let projectAlloc = empIds.find(e => e.EmployeeID == emp.EmployeeId);
+                if (projectAlloc) {
+                    project = projects.find(p => p.project_id == projectAlloc.ProjectID);
+                }
+
+                return {
+                    ...emp.dataValues,
+                    present,
+                    absent,
+                    half,
+                    count,
+                    logs,
+                    wo,
+                    others,
+                    complience,
+                    // attendanceLogs.filter(log => log.EmployeeNumber == emp.dataValues.Number), //.map(obj => { return {...obj, day: new Date(obj.AttendanceDate)}}),
+                    schedule,
+                    project
+                }
+            })
+            const getCommitedDays = (schedule: any) => {
+                let DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+                return DAYS.filter(day => schedule?.[day] == '1');
+            }
+            let cp = 0, ca = 0, ap = 0, aa = 0, ch = 0, ah = 0;
+            console.log("result: ", result)
+            let data = result.map((d: any) => {
+                let commitedDays = getCommitedDays(d?.schedule || {})
+                if (commitedDays.length > 0) {
+                    cp += d?.complience?.present || 0
+                    ca += d?.complience?.count - (d?.complience?.present + (d?.complience?.half))
+                    ch += d?.complience?.half || 0
+                    ap += d.present;
+                    aa += d.absent
+                    ah += d.half
+                }
+                console.log("CP-AP : ", cp, ap, ca, aa, ch, ah)
+
+                // let manager = commonController.getEmployeById(parseInt(d?.ManagerId));
+                let manager = managers?.find((mg: any) => mg?.dataValues?.EmployeeId == d?.ManagerId);
+                let compliance = d?.complience?.present + (d?.complience?.half / 2);
+                let attendance = commitedDays.length > 0 ? d?.present + (d?.half / 2) : 0;
+                let aNaN = isNaN(Math.round((attendance / d?.count) * 100))
+                return {
+                    EmpId: d.EmployeeId,
+                    EmpNumber: d.Number,
+                    Username: d.UserName,
+                    Name: `${d.FirstName} ${d.LastName}`,
+                    Project: d?.project?.project_name,
+                    Manager: `${manager?.FirstName || ""} ${manager?.LastName || ""}`,
+                    "Work Mode": commitedDays.length > 0 ? "Office" : "Remote",
+                    "Work Location": d.WorkLocation,
+                    "Commited Days": commitedDays.join(', '),
+                    Present: d?.present + (d?.half / 2),
+                    Absent: d?.absent + (d?.half / 2),
+                    Compliance: Math.round((compliance / ((d?.complience?.count) || 1)) * 100) + '%',
+                    Attendance: aNaN ? '0%' : Math.round((attendance / d?.count) * 100) + '%'
+                }
+            })
+
+            if (data.length > 0) {
+                let acount = aa + ap + ah, ccount = cp + ca + ch;
+                let resultData = {
+                    compliance: {
+                        achieved:`${Math.round(((cp + (ch / 2)) / ccount) * 100)}%`,
+                        not_achieved: `${Math.round(((ca + (ch / 2)) / ccount) * 100)}%`,
+                        presence: cp,
+                        half: ch,
+                        absence: ca,
+                        total: ccount
+                    },
+                    attendance: {
+                        come_to_office: `${Math.round(((ap + (ah / 2)) / acount) * 100)}%`,
+                        not_come_to_office: `${Math.round(((aa + (ah / 2)) / acount) * 100)}%`,
+                        presence: ap,
+                        half: ah,
+                        absence: aa,
+                        total: acount
+                    },
+                    client,
+                    month: monthList[month]
+                }
+
+               
+                res.send(resultData);
+            }else {
+                res.json("Something went wrong");
+            }
+        } catch (err) {
+            console.log(err)
+            res.json("Something went wrong");
+        }
+    }
+
 }
