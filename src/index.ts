@@ -1,5 +1,6 @@
-import http from 'http';
+import http from 'https';
 import expressServer from './server';
+import fs from 'fs'
 import dotenv from 'dotenv'
 dotenv.config()
 
@@ -15,8 +16,15 @@ let expressInstance = new expressServer().expressInstance;
 // Make port available within server
 expressInstance.set('port', port);
 
+// Creating object of key and certificate
+// for SSL
+const options = {
+    key: fs.readFileSync("server.key"),
+    cert: fs.readFileSync("server.cert"),
+};
+
 // Create the HTTP Express Server
-const server = http.createServer(expressInstance);
+const server = http.createServer(options, expressInstance);
 
 // Start listening on the specified Port (Default: 3000)
 server.listen(port);
