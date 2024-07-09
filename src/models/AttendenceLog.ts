@@ -55,5 +55,5 @@ export const AttendanceLog: sequelize.Model<AttendanceLogInterface, {}> = databa
     }
 }, {
         timestamps: false,
-        tableName: 'AttendanceLogs'
+        tableName: 'AttendanceLogV2'
     });
