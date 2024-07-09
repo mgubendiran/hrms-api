@@ -26,9 +26,60 @@ var targetDBConfig = {
 const getQuery = (perPage: number, page = 0, lastSyncIndex = 0) => {
   let offset = perPage * page;
   console.log("offset, perPage, page : ", offset, perPage, page)
+//   let query = `SELECT TOP ${perPage} * FROM (
+//       SELECT TOP ${perPage + offset} ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS ROW_NO,
+//   al.AttendanceLogId as AttendanceLogID,
+//   al.AttendanceDate,
+//   al.Present,
+//   al.Absent,
+//   al.Status,
+//   al.StatusCode,
+//   al.PunchRecords,
+//   al.InTime,
+//   al.InDeviceId,
+//   al.OutTime,
+//   al.OutDeviceId,
+//   al.Duration,
+//   al.LateBy,
+//   al.EarlyBy,
+//   al.ShiftId,
+//   e.EmployeeName,
+//   e.EmployeeCode
+// FROM AttendanceLogs al
+// INNER JOIN Employees e 
+// ON al.EmployeeId = e.EmployeeId 
+// AND al.AttendanceLogId > ${lastSyncIndex}
+// ) XX WHERE ROW_NO >${offset}`
+ // ORDER BY al.AttendanceLogId
+
+//  let query = `SELECT TOP ${perPage} * FROM (
+//   SELECT TOP ${perPage + offset} ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS ROW_NO,
+//   al.AttendanceLogId as AttendanceLogID,
+//   al.AttendanceDate,
+//   al.Present,
+//   al.Absent,
+//   al.Status,
+//   al.StatusCode,
+//   al.PunchRecords,
+//   al.InTime,
+//   al.InDeviceId,
+//   al.OutTime,
+//   al.OutDeviceId,
+//   al.Duration,
+//   al.LateBy,
+//   al.EarlyBy,
+//   al.ShiftId,
+//   e.EmployeeName,
+//   e.EmployeeCode
+//   FROM AttendanceLogs al 
+//   WHERE al.AttendanceLogId > ${lastSyncIndex} 
+//       AND al.EmployeeId IN (SELECT e.EmployeeId from Employees e ) 
+//   ORDER BY al.AttendanceLogId
+// ) XX WHERE ROW_NO >${offset}`
+
   let query = `SELECT TOP ${perPage} * FROM (
-      SELECT TOP ${perPage + offset} ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS ROW_NO,
-  al.AttendanceLogId as AttendanceLogID,
+SELECT TOP ${offset + perPage}  ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS ROW_NO,
+al.AttendanceLogId as AttendanceLogID,
   al.AttendanceDate,
   al.Present,
   al.Absent,
@@ -45,18 +96,20 @@ const getQuery = (perPage: number, page = 0, lastSyncIndex = 0) => {
   al.ShiftId,
   e.EmployeeName,
   e.EmployeeCode
-FROM AttendanceLogs al
+FROM AttendanceLogs al 
 INNER JOIN Employees e 
-ON al.EmployeeId = e.EmployeeId 
-AND al.AttendanceLogId > ${lastSyncIndex}
-ORDER BY al.AttendanceLogId
-) XX WHERE ROW_NO >${offset}`
+ON al.EmployeeId = e.EmployeeId
+WHERE al.AttendanceLogId > ${lastSyncIndex} 
+      AND al.EmployeeId IN (SELECT e.EmployeeId from Employees e ) 
+) XX WHERE ROW_NO > ${offset}`
+ console.log(query)
+
   return query;
 
 }
 
 const syncRecords = async (recordset = []) => {
-  const table = new sql.Table("attendance.dbo.AttendanceLogV1");
+  const table = new sql.Table("attendance.dbo.AttendanceLog");
   table.create = true;
   table.columns.add("AttendanceLogID", sql.Int, { nullable: false });
   table.columns.add("AttendanceDate", sql.DateTime, { nullable: true });
@@ -130,21 +183,25 @@ const syncData = async () => {
     let sqlPool = await mssql.GetCreateIfNotExistPool(sourceDBConfig)
     let request = new sql.Request(sqlPool);
     // let sourceDBCountQuery = `SELECT COUNT(al.AttendanceLogId) as count FROM AttendanceLogs al LEFT JOIN Employees e ON al.EmployeeId = e.EmployeeId  AND al.AttendanceLogId > ${index} AND e.CompanyId = 3`
-    
-    let sourceDBCountQuery = `WITH 
-      AttendanceLog as (
-    SELECT * FROM AttendanceLogs WHERE AttendanceLogId > ${index}
-    )
-SELECT COUNT(*) as count
-FROM AttendanceLog al
-LEFT OUTER JOIN Employees e ON al.EmployeeId = e.EmployeeId `
+
+    //     let sourceDBCountQuery = `WITH 
+    //       AttendanceLog as (
+    //     SELECT * FROM AttendanceLogs WHERE AttendanceLogId > ${index}
+    //     )
+    // SELECT COUNT(*) as count
+    // FROM AttendanceLog al
+    // LEFT OUTER JOIN Employees e ON al.EmployeeId = e.EmployeeId `
+    let sourceDBCountQuery = `select COUNT(*) as count FROM AttendanceLogs al
+INNER JOIN Employees e 
+ON al.EmployeeId = e.EmployeeId 
+AND al.AttendanceLogId > ${index}`
     const result = await request.query(sourceDBCountQuery)
     let count = result.recordset?.[0]?.count;
     console.log('Total New Records:', count)
-
-    let loop = Math.ceil(count / 10000);
+    let jobCount = 500;
+    let loop = Math.ceil(count / jobCount);
     for (let i = 0; i < loop; i++) {
-      const dataQuery = getQuery((i == loop - 1) ? count - (10000 * i) : 10000, i, index);
+      const dataQuery = getQuery((i == loop - 1) ? count - (jobCount * i) : jobCount, i, index);
       let data = await request.query(dataQuery);
       try {
         let records = await syncRecords(data.recordset);
