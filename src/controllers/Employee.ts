@@ -51,7 +51,7 @@ export class EmployeeController {
     async getEmployeeDashboardDataById(req: Request, res: Response) {
         try{
             let empId = req.params?.id;
-            console.log(empId)
+            console.log('empId: ', empId)
             let data: any = {}
             let employee: any = await Employee.findById(empId);
             if(employee) {

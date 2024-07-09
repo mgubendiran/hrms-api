@@ -3,6 +3,10 @@ import { EmployeeController } from '../controllers/Employee';
 import { AttendanceLogController } from '../controllers/AttendanceLog';
 import { EmployeeScheduleController } from '../controllers/EmployeeSchedule';
 import { ProjectController } from '../controllers/Project';
+import { CommonController } from '../helper/common';
+
+const commonController = new CommonController()
+
 
 export default class MainRouter {
 
@@ -81,6 +85,9 @@ export default class MainRouter {
 
         this.router.route('/attendance_log/client/:client/year/:year/month/:month/exchange_data')
             .get(this.attendanceLogController.exchangeDataMonthlyReport)
+
+        this.router.route('/process/sync_up')
+            .get(commonController.dbSyncUp)
         
     }
 

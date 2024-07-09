@@ -43,4 +43,9 @@ export default class Server {
         this.expressInstance.use('/', router);
     }
 
+    private backgroundProcessSetup() {
+
+
+    }
+
 }

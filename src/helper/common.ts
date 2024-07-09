@@ -2,7 +2,8 @@ import { Employee, EmployeeInterface } from '../models/Employee';
 import { EmployeeSchedule } from '../models/EmployeeSchedule';
 import { Project, ProjectInterface } from '../models/Project';
 import { ProjectAllocation, ProjectAllocationInterface } from '../models/ProjectAllocation';
-
+import syncData from './../db.sync-up'
+import { Request, Response } from 'express';
 
 
 export class CommonController {
@@ -101,6 +102,13 @@ export class CommonController {
             }
         }
         return day;
+    }
+
+    async dbSyncUp(req: Request, res: Response) {
+        syncData()
+        .then(data => console.log('sync-up is done : ', data))
+        .catch(err => console.log('sync-up error: ', err))
+        return res.json({masg: 'sync-up is started'})
     }
 
 

@@ -3,6 +3,9 @@ import expressServer from './server';
 import dotenv from 'dotenv'
 dotenv.config()
 
+const cron = require('node-cron');
+import syncData from './db.sync-up';
+
 // Normalize port number which will expose server
 const port = normalizePort(process.env.PORT || 3000);
 
@@ -56,3 +59,9 @@ function onListening(): void {
     const bind = typeof addr === 'string' ? `pipe ${addr}` : `Listetning on port ${addr.port}`;
     console.log(bind);
 }
+
+// for every 10 minutes
+cron.schedule('*/10 * * * *', () => { 
+    console.log('running a task every minute');
+    // syncData()
+});
