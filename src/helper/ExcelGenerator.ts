@@ -22,24 +22,27 @@ export function generateXLS(data: any, complienceImage: any, attendanceImage: an
     //   showGridLines: false
     // }]
     // Initialize the row index
-    let rowIndex = 5;
+    let rowIndex = 4;
     let InitialRow = worksheet.getRow(1)
     InitialRow.font =  { bold: true };
     InitialRow.getCell('A').value = "Client: " + (project || '');
-    InitialRow.getCell('A').alignment = { vertical: 'middle', horizontal: 'center' };
+    InitialRow.getCell('A').alignment = { vertical: 'middle', horizontal: 'left' };
     let headerRow = worksheet.getRow(2)
     headerRow.font =  { bold: true };
 
-    headerRow.getCell('B').value = 'Compliance '+ (cp || '0')  + '%';
-    headerRow.getCell('F').value = 'Attendance ' + (ap || '0')  + '%';
+    headerRow.getCell('A').value = 'Compliance '+ (cp || '0')  + '%';
+    headerRow.getCell('C').value = 'Attendance ' + (ap || '0')  + '%';
 
     let row = worksheet.getRow(rowIndex);
-    row.values = ["EmpId", "EmpNumber", "Username", "Name", "Project", "Manager", "Work Mode", "Work Location", "Commited Days", "Work-In Office", "Work-In Remote", "Compliance %", "Attendance %"];
+    // row.values = ["EmpId", "EmpNumber", "Username", "Name", "Project", "Manager", "Work Mode", "Work Location", "Commited Days", "Work-In Office", "Work-In Remote", "Compliance %", "Attendance %"];
+    row.values = [ "EmpNumber", "Name", "Project", "Manager", "Work Mode", "Work Location", "Commited Days", "Work-In Office", "Compliance %", "Attendance %"];
     row.font = { bold: true };
 
-    const columnWidths = [10, 20, 20, 30, 30, 30, 20, 20, 45, 15, 15, 15, 15];
+    // const columnWidths = [10, 20, 20, 30, 30, 30, 20, 20, 45, 15, 15, 15, 15];
+    const columnWidths = [20, 30, 30, 30, 20, 20, 45, 15, 15, 15];
+
     worksheet.mergeCells(
-      `A1:H1`
+      `A1:J1`
     );    
     row.eachCell((cell: any, colNumber: any) => {
         const columnIndex = colNumber - 1;
@@ -50,21 +53,20 @@ export function generateXLS(data: any, complienceImage: any, attendanceImage: an
       // Loop over the grouped data
       data.forEach((obj: any, index: number) => {
         const row = worksheet.getRow(rowIndex + index + 1);
-        row.getCell("A").value = obj.EmpId;
-        row.getCell("B").value = obj.EmpNumber;
-        row.getCell("C").value = obj.Username;
-        row.getCell("D").value = obj.Name;
-        row.getCell("E").value = obj?.Project;
-        row.getCell("F").value = obj?.Manager;
-        row.getCell("G").value = obj?.["Work Mode"];
-        row.getCell("H").value = obj?.["Work Location"];
-        row.getCell("I").value = obj?.["Commited Days"];
-        row.getCell("J").value = obj?.["Present"];
-        row.getCell("K").value = obj?.["Absent"];
-        row.getCell("L").value = obj?.["Compliance"];
-        row.getCell("M").value = obj?.["Attendance"];
-        row.getCell("D").alignment = { wrapText: true };
-        row.getCell("I").alignment = { wrapText: true };
+        row.getCell("A").value = obj.EmpNumber;
+        row.getCell("B").value = obj.Name;
+        row.getCell("C").value = obj?.Project;
+        row.getCell("D").value = obj?.Manager;
+        row.getCell("E").value = obj?.["Work Mode"];
+        row.getCell("F").value = obj?.["Work Location"];
+        row.getCell("G").value = obj?.["Commited Days"];
+        row.getCell("H").value = obj?.["Present"];
+        // row.getCell("K").value = obj?.["Absent"];
+        row.getCell("I").value = obj?.["Compliance"];
+        row.getCell("J").value = obj?.["Attendance"];
+
+        row.getCell("C").alignment = { wrapText: true };
+        row.getCell("G").alignment = { wrapText: true };
 
       });
       // Increment the row index
@@ -82,39 +84,40 @@ export function generateXLS(data: any, complienceImage: any, attendanceImage: an
       `${String.fromCharCode(65 + 4)}3:${String.fromCharCode(65 + 7)}3`
     );
 
-    const image = workbook.addImage({
-      // base64: base64_encode(path.join("public", 'logo.png')), //replace it your image (base 64 in this case)
-      base64: complienceImage,
-      extension: "png",
-      editAs: 'oneCell'
-    });
+    // disable Image
+    // const image = workbook.addImage({
+    //   // base64: base64_encode(path.join("public", 'logo.png')), //replace it your image (base 64 in this case)
+    //   base64: complienceImage,
+    //   extension: "png",
+    //   editAs: 'oneCell'
+    // });
 
-    const image2 = workbook.addImage({
-      // base64: base64_encode(path.join("public", 'logo.png')), //replace it your image (base 64 in this case)
-      base64: attendanceImage,
-      extension: "png",
-      editAs: 'oneCell'
-    });
+    // const image2 = workbook.addImage({
+    //   // base64: base64_encode(path.join("public", 'logo.png')), //replace it your image (base 64 in this case)
+    //   base64: attendanceImage,
+    //   extension: "png",
+    //   editAs: 'oneCell'
+    // });
 
-    worksheet.addImage(image, {
-      tl: { col: 0.8, row: 3.8 },
-      ext: { width: 250, height: 350 },
-    });
-    worksheet.getCell("A5").alignment = { vertical: 'middle', horizontal: 'center' };
+    // worksheet.addImage(image, {
+    //   tl: { col: 0.8, row: 3.8 },
+    //   ext: { width: 250, height: 350 },
+    // });
+    // worksheet.getCell("A5").alignment = { vertical: 'middle', horizontal: 'center' };
 
-    worksheet.mergeCells(
-      `A4:D4`
-    );
-    worksheet.mergeCells(
-      `E4:G4`
-    );
+    // worksheet.mergeCells(
+    //   `A4:D4`
+    // );
+    // worksheet.mergeCells(
+    //   `E4:G4`
+    // );
 
-    worksheet.addImage(image2, {
-      tl: { col: 4.80, row: 3.80 },
-      ext: { width: 250, height: 350 },
-    });
+    // worksheet.addImage(image2, {
+    //   tl: { col: 4.80, row: 3.80 },
+    //   ext: { width: 250, height: 350 },
+    // });
 
-    worksheet.getRow(4).height = 350;
+    // worksheet.getRow(4).height = 350;
 
     
     // Define the border style
