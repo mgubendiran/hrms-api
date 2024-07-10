@@ -1,4 +1,6 @@
-import http from 'https';
+import http from 'http';
+// import http from 'https';
+
 import expressServer from './server';
 import fs from 'fs'
 import dotenv from 'dotenv'
@@ -24,7 +26,9 @@ const options = {
 };
 
 // Create the HTTP Express Server
-const server = http.createServer(options, expressInstance);
+// const server = http.createServer(options, expressInstance);
+const server = http.createServer(expressInstance);
+
 
 // Start listening on the specified Port (Default: 3000)
 server.listen(port);

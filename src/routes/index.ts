@@ -82,12 +82,13 @@ export default class MainRouter {
             .get(this.attendanceLogController.downloadFile)
         this.router.route('/attendance_log/client/:client/year/:year/month/:month/export')
             .get(this.attendanceLogController.downloadMonthlyReport)
-
         this.router.route('/attendance_log/client/:client/year/:year/month/:month/exchange_data')
             .get(this.attendanceLogController.exchangeDataMonthlyReport)
-
         this.router.route('/process/sync_up')
             .get(commonController.dbSyncUp)
+
+        this.router.route('/attendance_log/manager/:managerId/year/:year/month/:month')
+            .get(this.attendanceLogController.getAttendanceLogsByManagerByMonth)
         
     }
 

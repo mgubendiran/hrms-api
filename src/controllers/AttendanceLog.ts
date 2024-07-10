@@ -839,7 +839,6 @@ export class AttendanceLogController {
         }
     }
 
-
     async exchangeDataMonthlyReport(req: Request, res: Response) {
         try {
             let client = req.params.client;
@@ -995,6 +994,95 @@ export class AttendanceLogController {
         } catch (err) {
             console.log(err)
             res.json("Something went wrong");
+        }
+    }
+
+
+    async getAttendanceLogsByManagerByMonth(req: Request, res: Response) {
+        try {
+            let managerId = parseInt(req.params.managerId);
+            let month = parseInt(req.params.month);
+            let year = parseInt(req.params.year);
+            let manager = await commonController.getEmployeById(managerId);
+            if (!manager) {
+                throw new Error('Employee is not found')
+            }
+            let empIds: any[] = await commonController.getEmployeesByManagerId(managerId);
+            let projectAllocations = await commonController.getProjectALlocationByEmployeeIds(empIds.map(obj => obj.EmployeeId));
+            if (!projectAllocations?.length) {
+                throw new Error('Project is not allocated')
+            }
+            let projects = await commonController.getProjectsByIds(projectAllocations?.map(obj => obj.ProjectID));
+            if (!projects?.length) {
+                throw new Error('Project is not found')
+            }
+            let employeeSchedule = await commonController.getEmployeesScheduleByIds(empIds.map(obj => obj.EmployeeId))
+            let employees: any = await commonController.getEmployeesByIds(empIds.map(obj => obj.EmployeeId));
+            let attendanceLogs = await AttendanceLog.findAll({
+                where: {
+                    EmployeeNumber: { in: employees.map((obj: any) => obj.Number) },
+                    AttendanceDate: {
+                        [Op.and]: [
+                            where(fn('MONTH', col('AttendanceDate')), month),
+                            where(fn('YEAR', col('AttendanceDate')), year),
+                            // where(fn('WEEK', col('AttendanceDate')), 1)
+                        ]
+                    }
+                }
+            })
+            let result = employees.map((emp: any) => {
+                let logs: any = attendanceLogs.filter(log => log.EmployeeNumber == emp.dataValues.Number);
+                logs = logs.map((obj: any) => {
+                    return { ...obj.dataValues, day: commonController.getDay(obj.dataValues.AttendanceDate) }
+                })
+                let schedule: any = employeeSchedule.find(schedule => schedule.EmployeeID == emp.dataValues.EmployeeId)
+                let present = 0;
+                let absent = 0;
+                let half = 0;
+                let wo = 0;
+                let others = 0;
+                let count = 0;
+                let complience = {
+                    present: 0,
+                    count: 0,
+                    half: 0
+                }
+                logs.forEach((element: any) => {
+                    let isComplience = schedule ? schedule[element.day] == '1' ? true : false : false;
+                    isComplience ? ++complience.count : null;
+                    switch (element.StatusCode) {
+                        case 'P': ++present; count++; isComplience ? ++complience.present : null; break;
+                        case 'A': ++absent; count++; break;
+                        case '½P': ++half; count++; isComplience ? ++complience.half : null; break;
+                        case 'WO': ++wo; break;
+                        default: ++others; break;
+                    }
+                });
+                let project: any = {};
+                let projectAlloc = empIds.find(e => e.EmployeeID == emp.EmployeeId);
+                if (projectAlloc) {
+                    project = projects.find(p => p.project_id == projectAlloc.ProjectID);
+                }
+
+                return {
+                    ...emp.dataValues,
+                    present,
+                    absent,
+                    half,
+                    count,
+                    logs,
+                    wo,
+                    others,
+                    complience,
+                    schedule,
+                    project
+                }
+            })
+            res.json(result)
+
+        }
+        catch (err) {
+            res.json(err);
         }
     }
 

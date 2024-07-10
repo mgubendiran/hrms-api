@@ -86,6 +86,54 @@ export class CommonController {
          return result
     }
 
+    async getEmployeesByManagerId(id: number) {
+        let result = await Employee.findAll({
+             where: {
+                ManagerId: id,
+                IsActive: true
+             },
+             order: ["FirstName", "LastName"]
+         }).catch((err: any) => {
+             throw err
+         });
+         return result
+    }
+
+    async getEmployeeById(id: number) {
+        let result = await Employee.findOne({
+            where: {
+                EmployeeId: id
+            }
+        }).catch((err: any) => {
+            throw err
+        })
+         return result
+    }
+
+    async getProjectsByIds(ids: number[]) {
+        let result = await Project.findAll({
+             where: {
+                project_id: { in: ids}
+             }
+         }).catch((err: any) => {
+             throw err
+         });
+         return result
+    }
+
+    async getProjectALlocationByEmployeeIds(ids: number[]) {
+        let result = await ProjectAllocation.findAll({
+            where: {
+                EmployeeID: {in: ids},
+                // IsReleased: false
+            }
+        }).catch((err: any) => {
+            throw err
+        });
+        console.log(result);
+        return result
+    }
+
 
     getDay = (date: string) => {
         let day = ''
