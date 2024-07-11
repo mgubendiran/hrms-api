@@ -765,7 +765,8 @@ export class AttendanceLogController {
                     imageData,
                     [
                     `Expected In-Office               - ${ccount} days`,
-                    `Compliance Achieved        - ${(cp + (ch / 2))} days (Full:${cp} - Half:${ch})`,
+                    `Compliance Achieved       
+                    - ${(cp + (ch / 2))} days (Full:${cp} - Half:${ch})`,
                     `Compliance Not Achieved - ${ca + (ch / 2)} days`
                     ], 'compliance.png')
                 let overlayImg2 = await textOverlay(
