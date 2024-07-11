@@ -763,14 +763,16 @@ export class AttendanceLogController {
                 // image.print(font, 20, 80, 'Compliance Not Achieved - 30 days
                 let overlayImg1 = await textOverlay(
                     imageData,
-                    [`Expected In-Office - ${ccount} days`,
-                    `Compliance Achieved - ${(cp + (ch / 2))} days (Full:${cp} - Half:${ch})`,
+                    [
+                    `Expected In-Office               - ${ccount} days`,
+                    `Compliance Achieved        - ${(cp + (ch / 2))} days (Full:${cp} - Half:${ch})`,
                     `Compliance Not Achieved - ${ca + (ch / 2)} days`
                     ], 'compliance.png')
                 let overlayImg2 = await textOverlay(
                     imageData2,
-                    [`Monthly Working - ${acount} days`,
-                    `Work-In Office - ${(ap + (ah / 2))} days (Full:${ap} - Half:${ah})`,
+                    [
+                    `Total Working         - ${acount} days`,
+                    `Work-In Office        - ${(ap + (ah / 2))} days (Full:${ap} - Half:${ah})`,
                     `Not Work-In Office - ${aa + (ah / 2)} days`
                     ], 'attendance.png')
 
