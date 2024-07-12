@@ -114,7 +114,7 @@ export class EmployeeController {
             let id = req.params.projectId ;
             const result: any = {}
             // get employees from project allocation
-            let project = await commonController.getProjectById(id);
+            let project = await commonController.getProjectById(parseInt(id));
             if(!project) {
                 throw new Error('project not found')
             }
@@ -152,14 +152,19 @@ export class EmployeeController {
            let employeeIds = (projectAllocationlist).map(obj => obj.EmployeeID);
            result.employeeIds = employeeIds;
 
-           let employees= await commonController.getEmployeesByIds(employeeIds);
-           result.employees = employees;
-           result.employeeIds = employees.map(o => o.EmployeeId)
+           let employees: any = await commonController.getEmployeesByIds(employeeIds);
+           let employeeListData: any = employees.map((obj: any) => {
+            let projectID = projectAllocationlist.find(pa => String(pa?.EmployeeID) == String(obj?.EmployeeId))?.ProjectID
+            obj.dataValues.project_id = projectID
+            return obj
+           })
+           result.employees = employeeListData;
+           result.employeeIds = employees.map((o: any) => o.EmployeeId)
 
-        //    console.log(employeeIds)
             res.json(result)
         }
         catch(err) {
+            console.log(err)
             res.json(err);
         }
         
