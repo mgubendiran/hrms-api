@@ -20,10 +20,10 @@ expressInstance.set('port', port);
 
 // Creating object of key and certificate
 // for SSL
-const options = {
-    key: fs.readFileSync("server.key"),
-    cert: fs.readFileSync("server.cert"),
-};
+// const options = {
+//     key: fs.readFileSync("server.key"),
+//     cert: fs.readFileSync("server.cert"),
+// };
 
 // Create the HTTP Express Server
 // const server = http.createServer(options, expressInstance);

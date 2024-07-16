@@ -14,7 +14,7 @@ export default class Database {
     database: sequelize.Sequelize;
 
     constructor() {
-        console.log('process.env.DB_NAME: , process.env.DB_NAME', process.env.DB_NAME)
+        // console.log('process.env.DB_NAME: , process.env.DB_NAME', process.env.DB_NAME)
         this.db = process.env.DB_NAME || 'db_name';
         this.user = process.env.DB_USER || 'db_user';
         this.password = process.env.DB_PASS || 'db_pass';
