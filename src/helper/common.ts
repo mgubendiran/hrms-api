@@ -1,3 +1,4 @@
+import { Op } from 'sequelize';
 import { Employee, EmployeeInterface } from '../models/Employee';
 import { EmployeeSchedule } from '../models/EmployeeSchedule';
 import { Project, ProjectInterface } from '../models/Project';
@@ -48,7 +49,9 @@ export class CommonController {
     async getProjectByclient(client: string) {
         let result = await Project.findAll({
              where: {
-                client_name: client
+                client_name: {
+                    [Op.like]: `${client}%`
+                }
              }
          }).catch((err: any) => {
              throw err
