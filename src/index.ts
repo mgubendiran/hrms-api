@@ -73,7 +73,7 @@ function onListening(): void {
 }
 
 // for every 10 minutes
-cron.schedule('*/10 * * * *', () => { 
-    console.log('running a task every minute');
+cron.schedule('*/30 * * * *', () => { 
+    console.log('Syn up is started');
     // syncData()
 });
